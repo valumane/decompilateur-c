@@ -1,0 +1,66 @@
+Comprendre la sortie de ./retro ./exemple
+=========================================
+
+La commande ./retro ./exemple demande à retro d'analyser le fichier executable nommé « exemple ». Le programme utilise objdump pour afficher le désassemblage, c'est-à-dire les instructions processeur contenues dans le fichier. Il ne lance pas « exemple ».
+
+Format ELF
+----------
+« elf64-x86-64 » indique que le fichier utilise le format ELF, courant sous Linux, et qu'il est destiné à un processeur x86-64.
+
+Adresses et lignes
+------------------
+Chaque ligne contient une adresse, les octets machine qui encodent l'instruction, puis le nom de l'instruction et ses paramètres. Par exemple :
+
+    115b: e8 f0 fe ff ff    call 1050 <puts@plt>
+
+L'adresse 115b indique où se trouve l'instruction dans le programme. Les valeurs e8 f0 fe ff ff sont son encodage en octets. « call » appelle une fonction, ici le point d'entrée de puts dans la table des fonctions liées.
+
+Les sections
+------------
+.init et .fini contiennent du code d'initialisation et de fin ajouté par l'environnement de compilation.
+
+.plt et .plt.got servent à appeler des fonctions fournies par des bibliothèques partagées, comme puts de la bibliothèque C. Ces mécanismes permettent de relier le programme aux fonctions disponibles sur le système.
+
+.text contient principalement les instructions du programme. La sortie inclut aussi du code de démarrage et des fonctions ajoutées par le compilateur et l'éditeur de liens. Elles ne correspondent pas directement aux lignes écrites dans exemple.c.
+
+La fonction main de cet exemple
+--------------------------------
+La partie qui correspond le plus directement au programme C est la fonction main :
+
+    1149 <main>:
+        114d: push rbp
+        114e: mov rbp,rsp
+        1151: lea rax,[rip+0xeb0]  # 2008 <_IO_stdin_used+0x8>
+        1158: mov rdi,rax
+        115b: call 1050 <puts@plt>
+        1160: mov eax,0x0
+        1165: pop rbp
+        1166: ret
+
+Explication simplifiée :
+
+- push rbp et mov rbp,rsp préparent la pile utilisée par la fonction.
+- lea récupère l'adresse d'une chaîne de caractères stockée dans le programme.
+- mov rdi,rax place cette adresse dans le registre utilisé pour le premier argument d'une fonction sous la convention d'appel x86-64 Linux.
+- call puts@plt appelle puts, qui affiche la chaîne et ajoute un retour à la ligne.
+- mov eax,0 prépare la valeur de retour 0.
+- pop rbp restaure la pile, puis ret termine main.
+
+Cela correspond à un code source de ce genre :
+
+    int main(void) {
+        puts("Bonjour depuis le programme C !");
+        return 0;
+    }
+
+Le texte exact dépend du fichier exemple.c qui a servi à compiler l'exécutable. Les noms de variables, les commentaires et la mise en forme du code original ne se trouvent généralement pas dans le binaire. Le désassemblage aide à comprendre le fonctionnement, mais ne reconstitue pas fidèlement le code source d'origine.
+
+Pourquoi voit-on beaucoup d'autres instructions ?
+--------------------------------------------------
+Un exécutable contient aussi le démarrage du programme, la préparation des bibliothèques et des fonctions de gestion générées par le compilateur. C'est pourquoi la sortie est bien plus longue que la fonction main écrite en C.
+
+Pour afficher seulement quelques lignes autour de main, on peut utiliser :
+
+    objdump -d -M intel --disassemble=main ./exemple
+
+Le résultat peut varier selon le compilateur, ses options et le système.
