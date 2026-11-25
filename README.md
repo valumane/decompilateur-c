@@ -32,4 +32,8 @@ Cela correspond en C à `printf("hello");` suivi de `return 0;`.
 
 **Le fichier texte `example/test`** contient cinq octets : `61 62 63 64 65`, soit `abcde` en ASCII, sans saut de ligne final.
 
-[Notes sur l’en-tête ELF](explication_elf_header.txt) · [Prochaines étapes](TODO.md)
+## Documentation
+
+- [Spécification officielle ELF — Introduction au format de fichier](https://gabi.xinuos.com/elf/01-intro.html)
+- [Notes sur l’en-tête ELF](explication_elf_header.txt)
+- [Prochaines étapes](TODO.md)
