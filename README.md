@@ -4,19 +4,27 @@ Projet de décompilateur pour les exécutables Linux x86-64. L’objectif est de
 
 ## Compiler et essayer
 
-Sous Linux x86-64, avec GCC, G++ et GNU binutils, lancer depuis la racine du projet :
+Sous Linux x86-64, avec Make, GCC, G++ et GNU binutils, lancer depuis la racine du projet :
 
 ```sh
-gcc -O0 exemple.c -o exemple
-g++ retro.cpp -o retro
-g++ hexa.cpp -o hexa
+make
 ```
 
-La capture de la sortie d’`objdump` dans `retro` reste à corriger. Pour explorer l’exemple dès maintenant :
+Pour reconstruire le `main` du programme compilé :
 
 ```sh
-./hexa ./exemple | head -n 4                 # Premiers octets du fichier ELF
-objdump -M intel --disassemble=main ./exemple  # Assembleur de main
+./build/retro ./build/exemple
 ```
 
-[Guide de lecture du désassemblage](explication_retro.txt) · [Liste des tâches](TODO.md)
+Avec l’exemple recompilé ci-dessus, la sortie contient `printf("hello");` et `return 0;`. Le prototype reconnaît les chaînes constantes de `.rodata`, les appels simples à `printf` et `puts`, et les retours entiers constants. Il faut un binaire ELF x86-64 avec le symbole `main`. Si la traduction est incomplète, `retro` affiche les instructions observées et renvoie un code d’échec.
+
+Pour consulter tout le désassemblage, utiliser `./build/retro --asm ./build/exemple`.
+
+## Organisation
+
+- `src/retro/` contient la commande, l’appel à `objdump`, l’extraction des instructions de `main`, la lecture de `.rodata` et la traduction en pseudo-C.
+- `src/hexa/` contient la commande de lecture hexadécimale et le formatage de sa sortie.
+- `exemples/exemple.c` sert de programme d’essai.
+- `build/` reçoit les trois exécutables produits par `make`.
+
+[Rôle de chaque fichier](FICHIERS.md) · [Guide de lecture du désassemblage](explication_retro.txt) · [Liste des tâches](TODO.md)
