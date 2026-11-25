@@ -1,0 +1,62 @@
+chaque fichier compilé en c contient une entete elf
+
+----------------
+0000  7F 45 4C 46 02 01 01 00 00 00 00 00 00 00 00 00
+0010  03 00 3E 00 01 00 00 00 60 10 00 00 00 00 00 00
+0020  40 00 00 00 00 00 00 00 A0 36 00 00 00 00 00 00
+0030  00 00 00 00 40 00 38 00 0D 00 40 00 1F 00 1E 00
+----------------
+
+
+le magic number est 
+  nom   | value |  trad
+ELFMAG0 |   7F  | - 0x7f      0x00
+ELFMAG1 |   45  | - E         0x01
+ELFMAG2 |   4C  | - L         0x02
+ELFMAG3 |   46  | - F         0x03
+l'elf "Executable and Linking Format"'
+
+
+0x04
+02 : e_ident[EI_CLASS], identifie la capacité du fichier
+si 00 invalid class
+si 01 objet 32bits
+si 02 objet 64bits
+donc on est en 64bits
+
+0x05
+01
+ei_data to understand
+
+0x06
+01 
+e_version
+00 none
+01 current version
+
+
+0x07
+e_ident[EI_OSABI]
+
+0x08
+e_ident[EI_ABIVERSION]
+
+blablabla
+
+l''interessant
+
+
+0x28
+e_shoff : section header table offset
+en 64bits ( connue par 0x04 ) contient 8bits
+donc 0x28 et 0x29
+0x05 -> 01 donc little endian 
+donc 36 A0
+la table des section commnence en 0x36A0
+
+taille de la offset table : 
+e_shentsize en 0x3A donne la taille d''une entrée : 40 00 -> 64bits
+e_shnum en 0x3C donne le nombre d''entrée : 1F 00 -> 31 entrée
+
+
+
